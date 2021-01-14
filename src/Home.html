@@ -11,7 +11,7 @@
     </ul>
   </div>
   <Publish />
-  <p>Relays: {{ relays }}</p>
+  <p>Relays: {{ Object.keys(relays) }}</p>
   <div v-if="$store.state.home.size === 0">
     <p>Didn't find any notes to show.</p>
   </div>
@@ -24,7 +24,7 @@
   export default {
     computed: {
       relays() {
-        return Object.keys(pool.relays)
+        return pool.relays
       }
     }
   }
