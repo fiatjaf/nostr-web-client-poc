@@ -1,0 +1,6 @@
+*.env
+static/*.js
+static/*.js.map
+static/*.css
+.netlify
+node_modules
