@@ -7,6 +7,14 @@ export const pool = relayPool()
 
 const hardcodedRelays = [
   {
+    host: 'https://relay.nostr.org',
+    policy: 'rw'
+  },
+  {
+    host: 'https://nostr-relay.herokuapp.com',
+    policy: 'rw'
+  },
+  {
     host: 'https://nostr-relay.bigsun.xyz',
     policy: 'rw'
   }
