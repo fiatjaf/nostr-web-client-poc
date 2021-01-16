@@ -21,27 +21,30 @@ const hardcodedRelays = [
 ]
 
 export function relayStorePlugin(store) {
-  db.relays
-    .bulkPut(hardcodedRelays)
-    .then(() => db.relays.toArray())
-    .then(relays => {
-      relays.forEach(({host, policy}) => {
-        if (policy.indexOf('i') !== -1) {
-          store.commit('ignoreRelay', host)
-        }
-
-        let relay = pool.addRelay(host, parsePolicy(policy))
-        setTimeout(() => {
-          relay.reqFeed()
-        }, 1)
-      })
-    })
-
   store.subscribe(mutation => {
     switch (mutation.type) {
       case 'setInit':
+        const followingPromises = []
         store.state.following.forEach(key => {
-          pool.subKey(key)
+          followingPromises.push(pool.subKey(key)) 
+        })
+        Promise.all(followingPromises).then(() => {
+          db.relays
+          .bulkPut(hardcodedRelays)
+          .then(() => db.relays.toArray())
+          .then(relays => {
+            relays.forEach(({host, policy}) => {
+              if (policy.indexOf('i') !== -1) {
+                store.commit('ignoreRelay', host)
+              }
+      
+              let relay = pool.addRelay(host, parsePolicy(policy))
+              setTimeout(() => {
+                relay.reqFeed()
+              }, 1)
+            })
+          })
+      
         })
         break
       case 'follow':
