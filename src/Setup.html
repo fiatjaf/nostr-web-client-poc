@@ -16,7 +16,9 @@
   <section>
     <b>{{ showingIgnored ? 'Ignored relays' : 'Relays' }}:</b>
     &nbsp;
-    <a v-if="Object.keys($store.state.ignoredRelays).length" @click="showingIgnored = !showingIgnored"
+    <a
+      v-if="Object.keys($store.state.ignoredRelays).length"
+      @click="showingIgnored = !showingIgnored"
       >show {{ showingIgnored ? 'active' : 'ignored' }}
     </a>
     <div v-if="showingIgnored" v-for="host in $store.state.ignoredRelays">
@@ -72,18 +74,24 @@
         editing: null,
         host: '',
         policy_r: false,
-        policy_w: false
+        policy_w: false,
+
+        changedRelays: 1
       }
     },
     computed: {
       relays() {
+        this.changedRelays // hack to auto-update
+
         return Object.keys(pool.relays)
           .map(relayURL => {
             let relay = pool.relays[relayURL]
 
             return {
               host: relayURL,
-              policy: `${relay.policy.read ? 'r' : ''}${relay.policy.write ? 'w' : ''}`
+              policy: `${relay.policy.read ? 'r' : ''}${
+                relay.policy.write ? 'w' : ''
+              }`
             }
           })
           .filter(({policy}) => policy !== 'i')
@@ -97,9 +105,15 @@
             if (pb === 'w') return -1
             return 0
           })
-      },
+      }
+    },
+    created() {
+      setTimeout(this.refreshRelays, 300)
     },
     methods: {
+      refreshRelays() {
+        this.changedRelays++
+      },
       isValidKey(key) {
         if (typeof key !== 'string') return false
         if (key.length !== 64) return false
@@ -115,6 +129,7 @@
         e.preventDefault()
         e.stopPropagation()
         this.editing = null
+        this.refreshRelays()
       },
       editRelay(e, i) {
         e.preventDefault()
@@ -147,22 +162,26 @@
         }
 
         this.editing = null
-        this.$forceUpdate()
+        this.refreshRelays()
       },
       async recommendRelay(e, host) {
         e.preventDefault()
         this.$store.dispatch('recommendRelay', host)
-        this.$forceUpdate()
+        this.refreshRelays()
       },
       async ignoreRelay(e, host) {
         e.preventDefault()
-        await this.$store.dispatch('updateRelay', {key: host, host, policy: 'i'})
-        this.$forceUpdate()
+        await this.$store.dispatch('updateRelay', {
+          key: host,
+          host,
+          policy: 'i'
+        })
+        this.refreshRelays()
       },
       async unignoreRelay(e, host) {
         e.preventDefault()
         await this.$store.dispatch('updateRelay', {key: host, host, policy: ''})
-        this.$forceUpdate()
+        this.refreshRelays()
       }
     }
   }

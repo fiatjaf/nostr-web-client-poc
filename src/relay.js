@@ -26,7 +26,7 @@ export function relayStorePlugin(store) {
       case 'setInit':
         const followingPromises = []
         store.state.following.forEach(key => {
-          followingPromises.push(pool.subKey(key)) 
+          followingPromises.push(pool.subKey(key))
         })
         Promise.all(followingPromises).then(() => {
           db.relays
@@ -37,14 +37,14 @@ export function relayStorePlugin(store) {
               if (policy.indexOf('i') !== -1) {
                 store.commit('ignoreRelay', host)
               }
-      
+
               let relay = pool.addRelay(host, parsePolicy(policy))
               setTimeout(() => {
                 relay.reqFeed()
               }, 1)
             })
           })
-      
+
         })
         break
       case 'follow':
